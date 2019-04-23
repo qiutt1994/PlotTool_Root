@@ -1,0 +1,11 @@
+*.root
+*.pdf
+*.txt
+*.pkl
+*.dat
+*.pyc
+*.zip
+*.csv
+*.json
+*.o
+output
