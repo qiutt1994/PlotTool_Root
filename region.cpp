@@ -12,8 +12,25 @@ region::region()
 
 region::region(Histogram input) :
 	nominal{ input }
-{};
+{
+	nominal.name = "sum";
+};
 
+region::region(Histogram input, vector<Histogram> consist) :
+	nominal{ input }
+	{
+		nominal.name = "sum";
+		for(auto i: consist)
+		{
+			if(nominal.size() == i.size())
+				individal_nominal.push_back(i);
+			else
+			{
+				cout << "Error: cannot add sub histogram.";
+				exit(1);
+			}
+	  }
+	};
 
 region::~region()
 {
@@ -131,7 +148,7 @@ void region::calculate_sys()
 	}
 	shape = Histogram(nominal.binning, shape_height, nominal.statistics, shape_sys);
 	// free memory
-	
+
 	for (int i_bin = 0; i_bin < size(); i_bin++)
 		delete all_exp[i_bin];
 }

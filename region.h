@@ -14,9 +14,11 @@ public:
 	Histogram nominal;
 	Histogram systematics;
 	Histogram shape;
+	vector<Histogram> individal_nominal;
 
 	region();
 	region(Histogram);
+	region(Histogram, vector<Histogram>);
 	~region();
 
     // get size
@@ -30,4 +32,3 @@ public:
 	// convert object to json
 	string json();
 };
-

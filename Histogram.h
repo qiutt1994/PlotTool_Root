@@ -11,6 +11,7 @@ public:
 	std::vector<double> content;
 	std::vector<double> statistics;
 	std::vector<double> systematics;
+	string name = "noname";
 	// Default constructor
 	Histogram();
 	// Parameterized constructor
@@ -32,4 +33,3 @@ public:
 	void print();
 	string json();
 };
-

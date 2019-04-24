@@ -152,7 +152,8 @@ string Histogram::json()
 	stringstream ss;
 	ss << "\"binning\": " << vectertojson<double>(binning) << ", \"content\": " << vectertojson<double>(content)
 		<< ", \"stat\": " << vectertojson<double>(statistics) << ", \"syst\": " << vectertojson<double>(systematics)
-		<< "}";
+		<<  ", \"name\": " << "\"" << name << "\""
+		<<"}";
 	result += ss.str();
 	return result;
 }
