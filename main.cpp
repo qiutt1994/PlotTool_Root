@@ -10,6 +10,8 @@ using namespace std;
 
 struct branch_type
 {
+	string full;
+	string nominalname;
 	string sample;
 	string tag;
 	string region;
@@ -17,7 +19,7 @@ struct branch_type
 	string sys;
 	string updown;
 };
-std::vector<std::string> sample_list = {"W", "Wl", "Wcl", "Wbl", "Wbb", "Wbc", "Wcc", "WZ", "WW", "Zcc", "Zcl", "Zbl", "Zbc", "Zl", "Zbb", "Z", "ZZ", "stopWt", "stops", "stopt", "ttbar"};
+std::vector<std::string> sample_list = {"Wl", "Wcl", "Wbl", "Wbb", "Wbc", "Wcc", "WZ", "WW", "Zcc", "Zcl", "Zbl", "Zbc", "Zl", "Zbb", "ZZ", "stopWt", "stops", "stopt", "ttbar"};
 string fileaddress = "hadd_2lep_mc16d_produced_by_gitlab-CI.root";
 
 // splite string
@@ -36,6 +38,7 @@ vector<string> split(string input, char splitor)
 branch_type get_branch_type(string input)
 {
 	branch_type output;
+	output.full = input;
 	vector<string> sub = split(input,'_');
 	output.sample = sub[0];
 	output.tag = sub[1];
@@ -64,6 +67,7 @@ branch_type get_branch_type(string input)
 			if(i != sub.size()-1)
 				output.sys += "_";
 		}
+	output.nominalname = input.substr(0, input.find("Sys"));
 	return output;
 }
 
@@ -108,6 +112,7 @@ region create_hist(std::vector<string> tags, string theregion, string varible, b
 {
 	Histogram nominal;
 	std::vector<Histogram> sub_nominal;
+	std::vector<branch_type> nominaltype;
 	TFile *f1 = new TFile(fileaddress.c_str(),"OPEN");
 	// locate and stack nominal tree
 	for(auto k : *f1->GetListOfKeys())
@@ -128,7 +133,7 @@ region create_hist(std::vector<string> tags, string theregion, string varible, b
 			}
 			TH1F *hist;
 			hist = (TH1F *) f1->Get(k->GetName());
-
+			nominaltype.push_back(subs);
 			if(nominal.size()==0)
 			 nominal = loadhist(hist);
 			else
@@ -200,9 +205,91 @@ region create_hist(std::vector<string> tags, string theregion, string varible, b
 		if(sys_down.size()>0)
 			cout << "Warning: unmatched sys_down.";
 
+//----------------------------------------------------------------------------------------------------------------
 		// add systematics to histogram
 		cout << "here"<<endl;
+		std::vector<string> allsysname = discover_sys();
+		std::vector<string> allsysnameupdown;
+		std::vector<string> allsysnameonside;
+		vector<vector<branch_type>> updowntype;
+		vector<branch_type> onesidetype;
 		for(auto i_updown: sys_updown)
+			updowntype.push_back({get_branch_type(i_updown[0]), get_branch_type(i_updown[1])});
+		for (auto i_oneside: sys_oneside)
+			onesidetype.push_back(get_branch_type(i_oneside));
+		for(auto each_sys: allsysname)
+		{
+			bool foundit = false;
+			int j = 0;
+			for(int i{0}; i< updowntype.size(); i++)
+			{
+				if (updowntype[i][0].sys == each_sys)
+				{
+					foundit = true;
+					break;
+				}
+			}
+			if(foundit)
+				allsysnameupdown.push_back(each_sys);
+			else
+				allsysnameonside.push_back(each_sys);
+		}
+		// open nominal tree
+		TFile *no = new TFile(fileaddress.c_str(),"OPEN");
+		//try to find all systematics in sys tree first. then go to nominaltype.
+		for(auto each: allsysnameupdown)
+		{
+			Histogram totalhistup;
+			Histogram totalhistdown;
+			std::vector<string> sampleused;
+			for(auto each_address: updowntype)
+			{
+				if(each == each_address[0].sys)
+				{
+					sampleused.push_back(each_address[0].sample);
+					TH1F *hist1 = (TH1F *) o1->Get(each_address[0].full.c_str());
+					TH1F *hist2 = (TH1F *) o1->Get(each_address[1].full.c_str());
+					Histogram up = loadhist(hist1);
+					Histogram down = loadhist(hist2);
+					if (totalhistup.size() > 0)
+					{
+						totalhistup.add(up);
+						totalhistdown.add(down);
+						continue;
+					}
+					totalhistup = up;
+					totalhistdown = down;
+				}
+			}
+			// here find sample not used
+			for(auto each_sample: sample_list)
+			{
+				if(std::find(sampleused.begin(), sampleused.end(), each_sample) == sampleused.end())
+				{
+					for(auto each_no: nominaltype)
+					{
+						if(each_no.sample == each_sample)
+						{
+							TH1F *hist1 = (TH1F *) no->Get(each_no.full.c_str());
+							Histogram up = loadhist(hist1);
+							if (totalhistup.size() > 0)
+							{
+								totalhistup.add(up);
+								totalhistdown.add(up);
+								continue;
+							}
+							totalhistup = up;
+							totalhistdown = up;
+						}
+					}
+				}
+			}
+			output.add_sys(totalhistup,totalhistdown);
+		}
+		// one side loop here
+
+//------------------------------------------------------------------------------------------
+/*		for(auto i_updown: sys_updown)
 		{
 			TH1F *hist1 = (TH1F *) o1->Get(i_updown[0].c_str());
 			TH1F *hist2 = (TH1F *) o1->Get(i_updown[1].c_str());
@@ -218,6 +305,7 @@ region create_hist(std::vector<string> tags, string theregion, string varible, b
 			output.add_sys(oneside);
 		}
 		cout << "here"<<endl;
+		output.calculate_sys();*/
   }
 	//output.calculate_sys();
 	cout<<output.json()<<endl;
