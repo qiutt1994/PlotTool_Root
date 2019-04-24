@@ -11,6 +11,7 @@ public:
 	std::vector<double> content;
 	std::vector<double> statistics;
 	std::vector<double> systematics;
+	std::vector<string> notes;
 	string name = "noname";
 	// Default constructor
 	Histogram();
@@ -24,7 +25,7 @@ public:
 	// get histogram size
 	int size();
 	// merge histogram
-	void add(Histogram);
+	void add(Histogram, string = "none");
 	// retrun difference between bins
 	std::vector<double> subtraction(Histogram);
 	// return total number of event

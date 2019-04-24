@@ -61,8 +61,9 @@ int Histogram::size()
 }
 
 // merge histogram
-void Histogram::add(Histogram h1)
+void Histogram::add(Histogram h1, string note)
 {
+	notes.push_back(note);
 	// check size
 	if (size() != h1.size())
 	{
@@ -152,7 +153,7 @@ string Histogram::json()
 	stringstream ss;
 	ss << "\"binning\": " << vectertojson<double>(binning) << ", \"content\": " << vectertojson<double>(content)
 		<< ", \"stat\": " << vectertojson<double>(statistics) << ", \"syst\": " << vectertojson<double>(systematics)
-		<<  ", \"name\": " << "\"" << name << "\""
+		<<  ", \"name\": "  << "\"" << name << "\""
 		<<"}";
 	result += ss.str();
 	return result;
