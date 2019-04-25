@@ -20,8 +20,8 @@ struct branch_type
 	string sys;
 	string updown;
 };
-std::vector<std::string> sample_list = {"Wl", "Wcl", "Wbl", "Wbb", "Wbc", "Wcc", "WZ", "WW", "Zcc", "Zcl", "Zbl", "Zbc", "Zl", "Zbb", "ZZ", "stopWt", "stops", "stopt", "ttbar"};
-string fileaddress = "hadd_2lep_mc16d_produced_by_gitlab-CI.root";
+std::vector<std::string> sample_list = {"Wl", "Wcl", "Wbl", "Wbb", "Wbc", "Wcc", "WZ", "WW", "Zcc", "Zcl", "Zbl", "Zbc", "Zl", "Zbb", "ZZ", "stopWt", "stops", "stopt", "ttbar", "ggZllH125", "qqZllH125", "stopWt_dilep"};
+string fileaddress = "oldpaper.root";
 
 // splite string
 vector<string> split(string input, char splitor)
@@ -36,6 +36,50 @@ vector<string> split(string input, char splitor)
 	return output;
 }
 
+branch_type get_branch_type(string input)
+{
+	branch_type output;
+	output.full = input;
+	vector<string> sub = split(input,'_');
+	int theindex{0};
+	output.sample = sub[theindex++];
+	if(!(sub[theindex].at(0) =='0' || sub[theindex].at(0) =='1' || sub[theindex].at(0) =='2' || sub[theindex].at(0) =='3'))
+	{
+		output.sample += "_" + sub[theindex++];
+	}
+	output.tag = sub[theindex++];
+	theindex++;
+	output.region = sub[theindex++];
+	output.updown = sub[sub.size() - 1];
+
+	int sysstart{int(sub.size())};
+	for(int i{0}; i< sub.size(); i++)
+	{
+		if (sub[i].size() < 3) continue;
+		if(sub[i].substr(0,3) == "Sys")
+		{
+			sysstart = i;
+			break;
+		}
+	}
+	for (int i{theindex++}; i < sysstart; i++)
+	{
+		output.variable += sub[i];
+		if(i != sysstart-1)
+			output.variable += "_";
+  }
+		for (int i{sysstart}; i < sub.size()-1; i++)
+		{
+			output.sys += sub[i];
+			if(i != sub.size()-1)
+				output.sys += "_";
+		}
+	output.nominalname = input.substr(0, input.find("Sys"));
+	return output;
+}
+
+/*
+// conservative version
 branch_type get_branch_type(string input)
 {
 	branch_type output;
@@ -70,7 +114,7 @@ branch_type get_branch_type(string input)
 		}
 	output.nominalname = input.substr(0, input.find("Sys"));
 	return output;
-}
+}*/
 
 std::vector<string> discover_sys()
 {
@@ -115,6 +159,7 @@ string create_hist(std::vector<string> tags, string theregion, string varible, b
 	std::vector<Histogram> sub_nominal;
 	std::vector<branch_type> nominaltype;
 	TFile *f1 = new TFile(fileaddress.c_str(),"OPEN");
+	cout << "Loading nominal" << endl;
 	// locate and stack nominal tree
 	for(auto k : *f1->GetListOfKeys())
 	{
@@ -164,8 +209,10 @@ string create_hist(std::vector<string> tags, string theregion, string varible, b
 	//}
 
 	region output(nominal, sub_nominal);
+
 	if(sys)
 	{
+		cout << "loading systematics" << endl;
 		// discover systematics
 		vector<string> sys_up;
 		vector<string> sys_down;
@@ -208,7 +255,7 @@ string create_hist(std::vector<string> tags, string theregion, string varible, b
 			}
 		}
 		if(sys_down.size()>0)
-			cout << "Warning: unmatched sys_down.";
+			cout << "Warning: unmatched sys_down " << sys_down.size() << endl;
 
 //----------------------------------------------------------------------------------------------------------------
 		// add systematics to histogram
@@ -335,6 +382,7 @@ string create_hist(std::vector<string> tags, string theregion, string varible, b
 		}
 
 		// claculate systematics
+		cout << "calculating systematics" << endl;
 		output.calculate_sys();
   }
 	return output.json();
@@ -344,20 +392,20 @@ string create_hist(std::vector<string> tags, string theregion, string varible, b
 int main()
 {
 
-	std::vector<string> tags = {"0tag2pjet", "1tag2pjet"};
+	std::vector<string> tags = {"2tag2pjet"};
 	string theregion = "SR";
-	string varible = "pTBB";
-	/*
+	string varible = "mVH";
+
 	string test = create_hist(tags,theregion,varible,true);
 	ofstream myfile;
-	myfile.open ("ptBBsr.txt");
+	myfile.open ("mVHsr.txt");
 	myfile << test <<"\n";
-	myfile.close();*/
+	myfile.close();
 
 	sample_list = {"data"};
 	string test2 = create_hist(tags,theregion,varible,false);
 	ofstream myfile1;
-	myfile1.open ("ptBBsrdata.txt");
+	myfile1.open ("mVHsrdata.txt");
 	myfile1 << test2 <<"\n";
 	myfile1.close();
     //std::vector<std::string> sample_list = {"W", "Wl", "Wcl", "Wbl", "Wbb", "Wbc", "Wcc", "WZ", "WW", "Zcc", "Zcl", "Zbl", "Zbc", "Zl", "Zbb", "Z", "ZZ", "stopWt", "stops", "stopt", "ttbar"};
