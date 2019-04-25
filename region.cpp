@@ -156,5 +156,16 @@ void region::calculate_sys()
 // unfinished
 string region::json()
 {
-	return string();
+	string output{"{\"nominal\": "};
+	output += nominal.json() + ", ";
+	output += "\"shape\": ";
+	output += shape.json() + ", ";
+	for( auto each: individal_nominal)
+	{
+		output += "\"" + each.name + "\": ";
+		output += each.json() + ", ";
+	}
+	output = output.substr(0, output.size()-2);
+	output += "}";
+	return output;
 }

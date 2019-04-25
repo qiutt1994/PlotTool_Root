@@ -6,6 +6,7 @@
 #include "Histogram.h"
 #include <sstream>
 #include <typeinfo>
+#include <fstream>
 using namespace std;
 
 struct branch_type
@@ -108,7 +109,7 @@ Histogram loadhist(TH1F* input)
 
 
 // create final histogram can calculate systematics
-region create_hist(std::vector<string> tags, string theregion, string varible, bool sys = false)
+string create_hist(std::vector<string> tags, string theregion, string varible, bool sys = false)
 {
 	Histogram nominal;
 	std::vector<Histogram> sub_nominal;
@@ -157,6 +158,10 @@ region create_hist(std::vector<string> tags, string theregion, string varible, b
 				sub_nominal.push_back(tem);
 			}
 	}
+
+	//for (auto each: sub_nominal){
+//		cout << each.name<<endl;
+	//}
 
 	region output(nominal, sub_nominal);
 	if(sys)
@@ -207,7 +212,6 @@ region create_hist(std::vector<string> tags, string theregion, string varible, b
 
 //----------------------------------------------------------------------------------------------------------------
 		// add systematics to histogram
-		cout << "here"<<endl;
 		std::vector<string> allsysname = discover_sys();
 		std::vector<string> allsysnameupdown;
 		std::vector<string> allsysnameonside;
@@ -287,29 +291,54 @@ region create_hist(std::vector<string> tags, string theregion, string varible, b
 			output.add_sys(totalhistup,totalhistdown);
 		}
 		// one side loop here
+		for(auto each: allsysnameonside)
+		{
+			Histogram totalhistup;
+			std::vector<string> sampleused;
+			for(auto each_address: onesidetype)
+			{
+				if(each == each_address.sys)
+				{
+					sampleused.push_back(each_address.sample);
+					TH1F *hist1 = (TH1F *) o1->Get(each_address.full.c_str());
+					Histogram up = loadhist(hist1);
+					if (totalhistup.size() > 0)
+					{
+						totalhistup.add(up);
+						continue;
+					}
+					totalhistup = up;
+				}
+			}
+			// here find sample not used
+			for(auto each_sample: sample_list)
+			{
+				if(std::find(sampleused.begin(), sampleused.end(), each_sample) == sampleused.end())
+				{
+					for(auto each_no: nominaltype)
+					{
+						if(each_no.sample == each_sample)
+						{
+							TH1F *hist1 = (TH1F *) no->Get(each_no.full.c_str());
+							Histogram up = loadhist(hist1);
+							if (totalhistup.size() > 0)
+							{
+								totalhistup.add(up);
+								continue;
+							}
+							totalhistup = up;
+						}
+					}
+				}
+			}
+			output.add_sys(totalhistup);
+		}
 
-//------------------------------------------------------------------------------------------
-/*		for(auto i_updown: sys_updown)
-		{
-			TH1F *hist1 = (TH1F *) o1->Get(i_updown[0].c_str());
-			TH1F *hist2 = (TH1F *) o1->Get(i_updown[1].c_str());
-			Histogram up = loadhist(hist1);
-			Histogram down = loadhist(hist2);
-			output.add_sys(up,down);
-		}
-		cout << "here"<<endl;
-		for (auto i_oneside: sys_oneside)
-		{
-			TH1F *hist1 = (TH1F *) o1->Get(i_oneside.c_str());
-			Histogram oneside = loadhist(hist1);
-			output.add_sys(oneside);
-		}
-		cout << "here"<<endl;
-		output.calculate_sys();*/
+		// claculate systematics
+		output.calculate_sys();
   }
-	//output.calculate_sys();
-	cout<<output.json()<<endl;
-	return output;
+	return output.json();
+	//return output;
 }
 
 int main()
@@ -318,7 +347,19 @@ int main()
 	std::vector<string> tags = {"0tag2pjet", "1tag2pjet"};
 	string theregion = "SR";
 	string varible = "pTBB";
-	create_hist(tags,theregion,varible,true);
+	/*
+	string test = create_hist(tags,theregion,varible,true);
+	ofstream myfile;
+	myfile.open ("ptBBsr.txt");
+	myfile << test <<"\n";
+	myfile.close();*/
+
+	sample_list = {"data"};
+	string test2 = create_hist(tags,theregion,varible,false);
+	ofstream myfile1;
+	myfile1.open ("ptBBsrdata.txt");
+	myfile1 << test2 <<"\n";
+	myfile1.close();
     //std::vector<std::string> sample_list = {"W", "Wl", "Wcl", "Wbl", "Wbb", "Wbc", "Wcc", "WZ", "WW", "Zcc", "Zcl", "Zbl", "Zbc", "Zl", "Zbb", "Z", "ZZ", "stopWt", "stops", "stopt", "ttbar"};
     //sample_list = {"hist-ZmumuL_Sh221.root"};
     //TFile *f1 = new TFile("hadd_2lep_mc16d_produced_by_gitlab-CI.root","OPEN");

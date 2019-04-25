@@ -48,6 +48,7 @@ Histogram::Histogram(const Histogram& input)
 		content = input.content;
 		statistics = input.statistics;
 		systematics = input.systematics;
+		name = input.name;
 	}
 }
 
