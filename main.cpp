@@ -22,7 +22,7 @@ struct branch_type
 };
 std::vector<std::string> sample_list = {"Wl", "Wcl", "Wbl", "Wbb", "Wbc", "Wcc", "WZ", "WW", "Zcc", "Zcl", "Zbl", "Zbc", "Zl", "Zbb", "ZZ", "stopWt", "stops", "stopt", "ttbar", "ggZllH125", "qqZllH125", "stopWt_dilep"};
 string fileaddress = "oldpaper.root";
-
+string period = "a";
 // splite string
 vector<string> split(string input, char splitor)
 {
@@ -128,8 +128,11 @@ std::vector<string> discover_sys()
 		if (sub.size() < 3) continue;
 		branch_type subs = get_branch_type(k->GetName());
 		sysname = subs.sys;
-		if(std::find(output.begin(), output.end(), sysname) == output.end())
+		
+		if(std::find(output.begin(), output.end(), sysname) == output.end()){
 			output.push_back(sysname);
+			//cout << sysname << endl;
+		}
 			//cout << k->GetName()<<"     "<<sysname <<endl;}
 	}
 	//for (string each: output) cout<<each<<" ";
@@ -389,17 +392,37 @@ string create_hist(std::vector<string> tags, string theregion, string varible, b
 	//return output;
 }
 
-int main()
+void make_plot(std::vector<string> tags, string theregion, string variable)
 {
 
+	string filename;
+	filename = period + "_" + variable + "_" + theregion + "_";
+	for (auto each: tags)
+		filename += each +"-";
+	filename += "_.json";
+	std::vector<std::string> sample_list_backup = sample_list;
+	string mc = create_hist(tags,theregion,variable,true);
+	sample_list = {"data"};
+	string data = create_hist(tags,theregion,variable,false);
+	ofstream myfile;
+	myfile.open ("jsonoutput/" + filename);
+	myfile << mc <<"\n";
+	myfile << data <<"\n";
+	myfile.close();
+	sample_list = sample_list_backup;
+}
+
+int main()
+{
+	fileaddress = "oldpaper.root";
 	std::vector<string> tags = {"2tag2pjet"};
 	string theregion = "SR";
-	string varible = "mVH";
-
-	string test = create_hist(tags,theregion,varible,true);
+	string variable = "mVH";
+	make_plot(tags, theregion, variable);
+	/*string mc = create_hist(tags,theregion,varible,true);
 	ofstream myfile;
 	myfile.open ("mVHsr.txt");
-	myfile << test <<"\n";
+	myfile << mc <<"\n";
 	myfile.close();
 
 	sample_list = {"data"};
@@ -408,6 +431,8 @@ int main()
 	myfile1.open ("mVHsrdata.txt");
 	myfile1 << test2 <<"\n";
 	myfile1.close();
+*/
+
     //std::vector<std::string> sample_list = {"W", "Wl", "Wcl", "Wbl", "Wbb", "Wbc", "Wcc", "WZ", "WW", "Zcc", "Zcl", "Zbl", "Zbc", "Zl", "Zbb", "Z", "ZZ", "stopWt", "stops", "stopt", "ttbar"};
     //sample_list = {"hist-ZmumuL_Sh221.root"};
     //TFile *f1 = new TFile("hadd_2lep_mc16d_produced_by_gitlab-CI.root","OPEN");
