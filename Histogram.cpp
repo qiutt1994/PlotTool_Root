@@ -34,7 +34,7 @@ Histogram::Histogram(std::vector<double> bin, std::vector<double> con, std::vect
 	}
 	else
 	{
-		cout << "Error: invalid bin size.";
+		cout << "Error: invalid bin size." << bin.size() - 1 << "  " << con.size() <<"  "<< sta.size();
 		exit(1);
 	}
 }

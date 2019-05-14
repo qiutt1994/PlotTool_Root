@@ -20,7 +20,8 @@ struct branch_type
 	string sys;
 	string updown;
 };
-std::vector<std::string> sample_list = {"Wl", "Wcl", "Wbl", "Wbb", "Wbc", "Wcc", "WZ", "WW", "Zcc", "Zcl", "Zbl", "Zbc", "Zl", "Zbb", "ZZ", "stopWt", "stops", "stopt", "ttbar", "ggZllH125", "qqZllH125", "stopWt_dilep"};
+std::vector<std::string> sample_list = {"Wl", "Wcl", "Wbl", "Wbb", "Wbc", "Wcc", "WZ", "WW", "Zcc", "Zcl", "Zbl", "Zbc", "Zl", "Zbb", "ZZ", "stopWt", "stops", "stopt", "ttbar", "ggZqqZll_Sh222", "ggWqqWlv_Sh222" "ggZllH125", "qqZllH125"};
+//std::vector<std::string> sample_list = {"WZ"};
 string fileaddress = "oldpaper.root";
 string period = "a";
 // splite string
@@ -131,11 +132,12 @@ std::vector<string> discover_sys()
 		
 		if(std::find(output.begin(), output.end(), sysname) == output.end()){
 			output.push_back(sysname);
-			//cout << sysname << endl;
+			cout << sysname << endl;
 		}
 			//cout << k->GetName()<<"     "<<sysname <<endl;}
 	}
 	//for (string each: output) cout<<each<<" ";
+	cout << "systematics discovered." <<endl;
 	return output;
 }
 // creat historam object using root TH1F
@@ -167,7 +169,7 @@ string create_hist(std::vector<string> tags, string theregion, string varible, b
 	for(auto k : *f1->GetListOfKeys())
 	{
 			vector<string> sub = split(k->GetName(),'_');
-			if (sub.size() < 3)
+			if (sub.size() < 4)
 				continue;
 			branch_type subs = get_branch_type(k->GetName());
 			if(std::find(sample_list.begin(), sample_list.end(), subs.sample) == sample_list.end())
@@ -180,6 +182,7 @@ string create_hist(std::vector<string> tags, string theregion, string varible, b
 			{
 				continue;
 			}
+
 			TH1F *hist;
 			hist = (TH1F *) f1->Get(k->GetName());
 			nominaltype.push_back(subs);
@@ -414,10 +417,13 @@ void make_plot(std::vector<string> tags, string theregion, string variable)
 
 int main()
 {
-	fileaddress = "oldpaper.root";
+	fileaddress = "sample/combined.root";
 	std::vector<string> tags = {"2tag2pjet"};
-	string theregion = "SR";
+	string theregion = "mBBcr";
+	//string theregion = "SR";
+	//string theregion = "topemucr";
 	string variable = "mVH";
+	period = "run2";
 	make_plot(tags, theregion, variable);
 	/*string mc = create_hist(tags,theregion,varible,true);
 	ofstream myfile;
