@@ -15,6 +15,11 @@ Histogram::Histogram()
 
 Histogram::Histogram(std::vector<double> bin, std::vector<double> con, std::vector<double> sta, std::vector<double> sys)
 {
+	if (bin.size()==0)
+	{
+		cout << "Histogram::Histogram: must have at least one bin." << endl;
+		exit(1);
+	}
 	if (bin.size() - 1 == con.size() && con.size() == sta.size())
 	{
 		binning = bin;
@@ -27,14 +32,14 @@ Histogram::Histogram(std::vector<double> bin, std::vector<double> con, std::vect
 				systematics = sys;
 			else
 			{
-				cout << "Error: invalid systematics bin size.";
+				cout << "Error: invalid systematics bin size." << endl;
 				exit(1);
 			}
 		}
 	}
 	else
 	{
-		cout << "Error: invalid bin size." << bin.size() - 1 << "  " << con.size() <<"  "<< sta.size();
+		cout << "Error: invalid bin size." << bin.size() - 1 << "  " << con.size() <<"  "<< sta.size() << endl;
 		exit(1);
 	}
 }

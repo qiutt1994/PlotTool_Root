@@ -126,7 +126,13 @@ void region::calculate_sys()
 		}
 		for (int i_bin = 0; i_bin < size(); i_bin++)
 		{
-			all_exp[i_bin]->append(total_diff[i_bin] + nominal.content[i_bin]);
+			double each_all_exp = total_diff[i_bin] + nominal.content[i_bin];
+			if( each_all_exp <0 ) 
+			{
+				//cout << each_all_exp << "   ";
+				each_all_exp = 0;
+			}
+			all_exp[i_bin]->append(each_all_exp);
 		}
 	}
 	nominal.systematics = vector<double>(size(), 0.);

@@ -75,7 +75,7 @@ double Expdata::sigma2()
 	double meanv(mean());
 	for (int i = 0; i < size(); i++)
 		result += pow(data[i] - meanv,2);
-	result = result / (size() - 1.);
+	result = result / size();
 	return result;
 }
 

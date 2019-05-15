@@ -20,7 +20,8 @@ struct branch_type
 	string sys;
 	string updown;
 };
-std::vector<std::string> sample_list = {"Wl", "Wcl", "Wbl", "Wbb", "Wbc", "Wcc", "WZ", "WW", "Zcc", "Zcl", "Zbl", "Zbc", "Zl", "Zbb", "ZZ", "stopWt", "stops", "stopt", "ttbar", "ggZqqZll_Sh222", "ggWqqWlv_Sh222" "ggZllH125", "qqZllH125"};
+std::vector<std::string> sample_list = {"Wl", "Wcl", "Wbl", "Wbb", "Wbc", "Wcc", "WZ", "WW", "Zcc", "Zcl", "Zbl", "Zbc", "Zl", "Zbb", "ZZ", "stopWt", "stops", "stopt", "ttbar", "ggZZ", "ggWW" "ggZllH125", "qqZllH125"};
+double rebin[23] = {50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 1000, 1150, 1350, 1550, 1800};
 //std::vector<std::string> sample_list = {"WZ"};
 string fileaddress = "oldpaper.root";
 string period = "a";
@@ -132,7 +133,7 @@ std::vector<string> discover_sys()
 		
 		if(std::find(output.begin(), output.end(), sysname) == output.end()){
 			output.push_back(sysname);
-			cout << sysname << endl;
+			//cout << sysname << endl;
 		}
 			//cout << k->GetName()<<"     "<<sysname <<endl;}
 	}
@@ -146,13 +147,14 @@ Histogram loadhist(TH1F* input)
 	vector<double> binning;
 	vector<double> stat;
 	vector<double> content;
-	for(int i{1}; i <= input->GetNbinsX(); i++ )
+	TH1F *hnew = dynamic_cast<TH1F*>(input->Rebin( sizeof(rebin)/sizeof(rebin[0])-1,"xxx",rebin));
+	for(int i{1}; i <= hnew->GetNbinsX(); i++ )
 	{
-		binning.push_back(input->GetBinLowEdge(i));
-		content.push_back(input->GetBinContent(i));
-		stat.push_back(input->GetBinError(i));
+		binning.push_back(hnew->GetBinLowEdge(i));
+		content.push_back(hnew->GetBinContent(i));
+		stat.push_back(hnew->GetBinError(i));
 	}
-	binning.push_back(input->GetBinLowEdge(input->GetNbinsX()+1));
+	binning.push_back(hnew->GetBinLowEdge(hnew->GetNbinsX()+1));
 	return Histogram(binning,content,stat);
 }
 
@@ -204,6 +206,7 @@ string create_hist(std::vector<string> tags, string theregion, string varible, b
 			}
 			if(!exist)
 			{
+				cout << subs.sample<<"  ";
 				Histogram tem  = loadhist(hist);
 				tem.name = subs.sample;
 				sub_nominal.push_back(tem);
@@ -262,6 +265,9 @@ string create_hist(std::vector<string> tags, string theregion, string varible, b
 		}
 		if(sys_down.size()>0)
 			cout << "Warning: unmatched sys_down " << sys_down.size() << endl;
+			for (auto each_down: sys_down){
+				cout << "   " <<each_down<<endl;
+				sys_oneside.push_back(each_down + "1down");}
 
 //----------------------------------------------------------------------------------------------------------------
 		// add systematics to histogram
@@ -415,16 +421,24 @@ void make_plot(std::vector<string> tags, string theregion, string variable)
 	sample_list = sample_list_backup;
 }
 
+
+
 int main()
 {
+	//fileaddress = "sample/combined.root";
+	//double xbins[23] = {50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 1000, 1150, 1350, 1550, 1800};
 	fileaddress = "sample/combined.root";
-	std::vector<string> tags = {"2tag2pjet"};
-	string theregion = "mBBcr";
+	std::vector<string> tags1 = {"1tag2pjet"};
+	std::vector<string> tags2 = {"2tag2pjet"};
+	std::vector<string> tags3 = {"3ptag2pjet"};
+	//string theregion = "mBBcr";
 	//string theregion = "SR";
-	//string theregion = "topemucr";
+	string theregion = "topemucr";
 	string variable = "mVH";
 	period = "run2";
-	make_plot(tags, theregion, variable);
+	make_plot(tags1, theregion, variable);
+	make_plot(tags2, theregion, variable);
+	make_plot(tags3, theregion, variable);
 	/*string mc = create_hist(tags,theregion,varible,true);
 	ofstream myfile;
 	myfile.open ("mVHsr.txt");
