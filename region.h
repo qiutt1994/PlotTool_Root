@@ -10,6 +10,8 @@ class region
 private:
 	std::vector<std::vector<Histogram*>> sys_updown;
 	std::vector<Histogram*> sys_oneside;
+	std::vector<string> sys_updown_name;
+	std::vector<string> sys_oneside_name;
 public:
 	Histogram nominal;
 	Histogram systematics;
@@ -25,10 +27,11 @@ public:
 	int size();
 
 	// add new systematics
-	void add_sys(Histogram);
-	void add_sys(Histogram, Histogram);
+	void add_sys(Histogram,string sys_name = "none");
+	void add_sys(Histogram, Histogram,string sys_name = "none");
 	// calculate systematics
 	void calculate_sys();
 	// convert object to json
 	string json();
+	string getsystable();
 };

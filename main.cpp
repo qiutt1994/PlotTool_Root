@@ -20,7 +20,7 @@ struct branch_type
 	string sys;
 	string updown;
 };
-std::vector<std::string> sample_list = {"Wl", "Wcl", "Wbl", "Wbb", "Wbc", "Wcc", "WZ", "WW", "Zcc", "Zcl", "Zbl", "Zbc", "Zl", "Zbb", "ZZ", "stopWt", "stops", "stopt", "ttbar", "ggZZ", "ggWW" "ggZllH125", "qqZllH125"};
+std::vector<std::string> sample_list = {"Wl", "Wcl", "Wbl", "Wbb", "Wbc", "Wcc", "WZ", "WW", "Zcc", "Zcl", "Zbl", "Zbc", "Zl", "Zbb", "ZZ", "stopWt", "stops", "stopt", "ttbar", "ggZZ", "ggWW"};// "ggZllH125", "qqZllH125"};
 double rebin[23] = {50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 1000, 1150, 1350, 1550, 1800};
 //std::vector<std::string> sample_list = {"WZ"};
 string fileaddress = "oldpaper.root";
@@ -135,7 +135,7 @@ std::vector<string> discover_sys()
 			output.push_back(sysname);
 			//cout << sysname << endl;
 		}
-			//cout << k->GetName()<<"     "<<sysname <<endl;}
+			//cout << k->GetName()<<"     "<<sysname <<endl;
 	}
 	//for (string each: output) cout<<each<<" ";
 	cout << "systematics discovered." <<endl;
@@ -347,7 +347,7 @@ string create_hist(std::vector<string> tags, string theregion, string varible, b
 					}
 				}
 			}
-			output.add_sys(totalhistup,totalhistdown);
+			output.add_sys(totalhistup,totalhistdown,each);
 		}
 		// one side loop here
 		for(auto each: allsysnameonside)
@@ -390,12 +390,13 @@ string create_hist(std::vector<string> tags, string theregion, string varible, b
 					}
 				}
 			}
-			output.add_sys(totalhistup);
+			output.add_sys(totalhistup,each);
 		}
 
 		// claculate systematics
 		cout << "calculating systematics" << endl;
 		output.calculate_sys();
+		cout << output.getsystable()<<endl;
   }
 	return output.json();
 	//return output;
@@ -437,8 +438,8 @@ int main()
 	string variable = "mVH";
 	period = "run2";
 	make_plot(tags1, theregion, variable);
-	make_plot(tags2, theregion, variable);
-	make_plot(tags3, theregion, variable);
+	//make_plot(tags2, theregion, variable);
+	//make_plot(tags3, theregion, variable);
 	/*string mc = create_hist(tags,theregion,varible,true);
 	ofstream myfile;
 	myfile.open ("mVHsr.txt");

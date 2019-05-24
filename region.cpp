@@ -52,12 +52,13 @@ int region::size()
 }
 
 // add new oneside systematics
-void region::add_sys(Histogram input)
+void region::add_sys(Histogram input, string sys_name)
 {
 	if (size() == input.size())
 	{
 		Histogram* sys = new Histogram(input);
 		sys_oneside.push_back(sys);
+		sys_oneside_name.push_back(sys_name);
 	}
 	else
 	{
@@ -67,7 +68,7 @@ void region::add_sys(Histogram input)
 }
 
 // add new twoside systematics
-void region::add_sys(Histogram input1, Histogram input2)
+void region::add_sys(Histogram input1, Histogram input2, string sys_name)
 {
 	if (size() == input1.size() && size() == input2.size())
 	{
@@ -75,6 +76,7 @@ void region::add_sys(Histogram input1, Histogram input2)
 		total.push_back(new Histogram(input1));
 		total.push_back(new Histogram(input2));
 		sys_updown.push_back(total);
+		sys_updown_name.push_back(sys_name);
 	}
 	else
 	{
@@ -99,11 +101,26 @@ void region::calculate_sys()
 	// each experiment
 	for(int i = 0; i < number_of_exp; i++)
 	{
+		//----------
+		// std::vector<double> syssum(size(), 0);
+		// int countsys = 0;
+		//---------
 		std::vector<double> total_diff(size(), 0);
 		// each systematics with up and down
 		for(auto each_sysupdown: sys_updown)
 		{
 			double number = distribution(generator);
+
+			//-------
+			//countsys +=2;
+			// std::vector<double> diffup;
+			// std::vector<double> diffdo;
+			// diffup = nominal.subtraction(*each_sysupdown[0]);
+			// diffdo = nominal.subtraction(*each_sysupdown[1]);
+			// for (int i_bin = 0; i_bin < size(); i_bin++)
+			// 	syssum[i_bin] += diffup[i_bin]*diffup[i_bin] + diffdo[i_bin]*diffdo[i_bin];
+			//-------
+
 			std::vector<double> diff;
 			if (number >= 0)
 			{
@@ -119,6 +136,18 @@ void region::calculate_sys()
 		// each systematics onesside
 		for (auto each_sysoneside : sys_oneside)
 		{
+			
+			//-------
+			// countsys +=1;
+			// std::vector<double> diffup;
+			// diffup = nominal.subtraction(*each_sysoneside);
+
+			// for (int i_bin = 0; i_bin < size(); i_bin++){
+			// 	syssum[i_bin] += diffup[i_bin]*diffup[i_bin]/2 + diffup[i_bin]*diffup[i_bin]/2;
+			// 	cout << each_sysoneside->content[i_bin] <<"------";}
+			// cout << endl;
+			//-------
+
 			double number = distribution(generator);
 			std::vector<double> diff = nominal.subtraction(*each_sysoneside);
 			for (int i_bin = 0; i_bin < size(); i_bin++)
@@ -126,6 +155,9 @@ void region::calculate_sys()
 		}
 		for (int i_bin = 0; i_bin < size(); i_bin++)
 		{
+			//--------
+			//cout << syssum[i_bin] << "    ";
+			//--------
 			double each_all_exp = total_diff[i_bin] + nominal.content[i_bin];
 			if( each_all_exp <0 ) 
 			{
@@ -134,6 +166,10 @@ void region::calculate_sys()
 			}
 			all_exp[i_bin]->append(each_all_exp);
 		}
+		//-----
+		// cout <<"\n"<<countsys<<endl;
+		// exit(1);
+		//-----
 	}
 	nominal.systematics = vector<double>(size(), 0.);
 	vector<double> newheight(size(), 0.);
@@ -173,5 +209,25 @@ string region::json()
 	}
 	output = output.substr(0, output.size()-2);
 	output += "}";
+	return output;
+}
+
+string region::getsystable()
+{
+	string output = "";
+	for(int i = 0;i<sys_oneside.size();i++)
+	{
+		double diff = 0;
+		diff = (sys_oneside[i]->sum() - nominal.sum())/nominal.sum() * 100;
+		output += sys_oneside_name[i] + " " + to_string(diff) + "\n";
+	}
+	for(int i = 0;i<sys_updown.size();i++)
+	{
+		double diff = 0;
+		diff = (sys_updown[i][0]->sum() - nominal.sum())/nominal.sum() * 100;
+		output += sys_updown_name[i] + " up " + to_string(diff) + "\n";
+		diff = (sys_updown[i][1]->sum() - nominal.sum())/nominal.sum() * 100;
+		output += sys_updown_name[i] + " down " + to_string(diff) + "\n";
+	}
 	return output;
 }
