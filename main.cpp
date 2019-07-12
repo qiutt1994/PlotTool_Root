@@ -23,7 +23,7 @@ struct branch_type
 std::vector<std::string> sample_list = {"Wl", "Wcl", "Wbl", "Wbb", "Wbc", "Wcc", "WZ", "WW", "Zcc", "Zcl", "Zbl", "Zbc", "Zl", "Zbb", "ZZ", "stopWt", "stops", "stopt", "ttbar", "ggZZ", "ggWW"};// "ggZllH125", "qqZllH125"};
 double rebin[23] = {50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 1000, 1150, 1350, 1550, 1800};
 //std::vector<std::string> sample_list = {"WZ"};
-string fileaddress = "oldpaper.root";
+string fileaddress = "combined.root";
 string period = "a";
 // splite string
 vector<string> split(string input, char splitor)
@@ -137,7 +137,7 @@ std::vector<string> discover_sys()
 		}
 			//cout << k->GetName()<<"     "<<sysname <<endl;
 	}
-	//for (string each: output) cout<<each<<" ";
+	for (string each: output) cout<<each<<" ";
 	cout << "systematics discovered." <<endl;
 	return output;
 }
@@ -428,16 +428,17 @@ int main()
 {
 	//fileaddress = "sample/combined.root";
 	//double xbins[23] = {50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 1000, 1150, 1350, 1550, 1800};
-	fileaddress = "sample/combined.root";
+	//fileaddress = "sample/combined.root";
+	fileaddress = "sample/oldpaper.root";
 	std::vector<string> tags1 = {"1tag2pjet"};
 	std::vector<string> tags2 = {"2tag2pjet"};
 	std::vector<string> tags3 = {"3ptag2pjet"};
 	//string theregion = "mBBcr";
-	//string theregion = "SR";
-	string theregion = "topemucr";
+	string theregion = "SR";
+	//string theregion = "topemucr";
 	string variable = "mVH";
-	period = "run2";
-	make_plot(tags1, theregion, variable);
+	period = "a";
+	make_plot(tags2, theregion, variable);
 	//make_plot(tags2, theregion, variable);
 	//make_plot(tags3, theregion, variable);
 	/*string mc = create_hist(tags,theregion,varible,true);
