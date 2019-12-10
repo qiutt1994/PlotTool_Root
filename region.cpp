@@ -220,17 +220,22 @@ string region::getsystable()
 	for(int i = 0;i<sys_oneside.size();i++)
 	{
 		double diff = 0;
+		double diff_shape = 0;
 		diff = (sys_oneside[i]->sum() - nominal.sum())/nominal.sum() * 100;
-		output += sys_oneside_name[i] + " " + to_string(diff) + "\n";
+		diff_shape = nominal.binneddiff(*(sys_oneside[i]));
+		output += sys_oneside_name[i] + " " + to_string(diff) + " " + to_string(diff_shape) + "\n";
 		allsysname.push_back(sys_oneside_name[i].substr(0, sys_oneside_name[i].size()-2));
 	}
 	for(int i = 0;i<sys_updown.size();i++)
 	{
 		double diff = 0;
+		double diff_shape = 0;
+		diff_shape = nominal.binneddiff(*(sys_updown[i][0]));
 		diff = (sys_updown[i][0]->sum() - nominal.sum())/nominal.sum() * 100;
-		output += sys_updown_name[i] + " up " + to_string(diff) + "\n";
+		output += sys_updown_name[i] + " up " + to_string(diff)  + " " + to_string(diff_shape) + "\n";
+		diff_shape = nominal.binneddiff(*(sys_updown[i][1]));
 		diff = (sys_updown[i][1]->sum() - nominal.sum())/nominal.sum() * 100;
-		output += sys_updown_name[i] + " down " + to_string(diff) + "\n";
+		output += sys_updown_name[i] + " down " + to_string(diff)  + " " + to_string(diff_shape) + "\n";
 		allsysname.push_back(sys_updown_name[i].substr(0, sys_updown_name[i].size()-2));
 	}
 	ofstream myfile;

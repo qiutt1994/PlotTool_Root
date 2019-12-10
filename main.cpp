@@ -23,8 +23,8 @@ struct branch_type
 std::vector<std::string> sample_list = {"Wl", "Wcl", "Wbl", "Wbb", "Wbc", "Wcc", "WZ", "WW", "Zcc", "Zcl", "Zbl", "Zbc", "Zl", "Zbb", "ZZ", "stopWt", "stops", "stopt", "ttbar", "ggZZ", "ggWW"};// "ggZllH125", "qqZllH125"};
 double rebin[23] = {50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 1000, 1150, 1350, 1550, 1800};
 //std::vector<std::string> sample_list = {"WZ"};
-string fileaddress = "combined.root";
-string period = "a";
+string fileaddress = "run2_fit.root";
+
 // splite string
 vector<string> split(string input, char splitor)
 {
@@ -139,6 +139,7 @@ std::vector<string> discover_sys()
 	}
 	for (string each: output) cout<<each<<" ";
 	cout << "systematics discovered." <<endl;
+	delete f1;
 	return output;
 }
 // creat historam object using root TH1F
@@ -147,7 +148,8 @@ Histogram loadhist(TH1F* input)
 	vector<double> binning;
 	vector<double> stat;
 	vector<double> content;
-	TH1F *hnew = dynamic_cast<TH1F*>(input->Rebin( sizeof(rebin)/sizeof(rebin[0])-1,"xxx",rebin));
+	//TH1F *hnew = dynamic_cast<TH1F*>(input->Rebin( sizeof(rebin)/sizeof(rebin[0])-1,"xxx",rebin));
+	TH1F *hnew = dynamic_cast<TH1F*>(input);
 	for(int i{1}; i <= hnew->GetNbinsX(); i++ )
 	{
 		binning.push_back(hnew->GetBinLowEdge(i));
@@ -398,11 +400,12 @@ string create_hist(std::vector<string> tags, string theregion, string varible, b
 		output.calculate_sys();
 		cout << output.getsystable()<<endl;
   }
+  delete f1;
 	return output.json();
 	//return output;
 }
 
-void make_plot(std::vector<string> tags, string theregion, string variable)
+void make_plot(std::vector<string> tags, string theregion, string variable, string period)
 {
 
 	string filename;
@@ -429,18 +432,24 @@ int main()
 	//fileaddress = "sample/combined.root";
 	//double xbins[23] = {50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 1000, 1150, 1350, 1550, 1800};
 	//fileaddress = "sample/combined.root";
-	fileaddress = "sample/oldpaper.root";
+	fileaddress = "sample/combined.root";
+	std::vector<string> tags0 = {"0tag2pjet"};
 	std::vector<string> tags1 = {"1tag2pjet"};
 	std::vector<string> tags2 = {"2tag2pjet"};
 	std::vector<string> tags3 = {"3ptag2pjet"};
 	//string theregion = "mBBcr";
-	string theregion = "SR";
-	//string theregion = "topemucr";
-	string variable = "mVH";
-	period = "a";
-	make_plot(tags2, theregion, variable);
-	//make_plot(tags2, theregion, variable);
-	//make_plot(tags3, theregion, variable);
+	string theregion1 = "SR";
+	string theregion2 = "topemucr";
+	string variable = "pTV";
+	string period = "run2";
+	make_plot(tags2, theregion1, variable, period);
+	// make_plot(tags1, theregion, variable, period);
+	// make_plot(tags2, theregion, variable, period);
+	// make_plot(tags3, theregion, variable, period);
+	// make_plot(tags0, theregion2, variable, period);
+	// make_plot(tags1, theregion2, variable, period);
+	// make_plot(tags2, theregion2, variable, period);
+	// make_plot(tags3, theregion2, variable, period);
 	/*string mc = create_hist(tags,theregion,varible,true);
 	ofstream myfile;
 	myfile.open ("mVHsr.txt");

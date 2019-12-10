@@ -24,6 +24,8 @@ public:
 	~Histogram();
 	// get histogram size
 	int size();
+	// compare eachbin
+	double binneddiff(Histogram);
 	// merge histogram
 	void add(Histogram, string = "none");
 	// retrun difference between bins

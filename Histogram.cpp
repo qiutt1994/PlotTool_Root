@@ -92,6 +92,24 @@ void Histogram::add(Histogram h1, string note)
 	}
 }
 
+double Histogram::binneddiff(Histogram input)
+{
+	double diff = 0;
+	if (size() == input.size())
+	{
+		for (int i = 0; i < size(); i++)
+		{
+			diff += abs(input.content[i] - content[i]);
+		}
+	}
+	else
+	{
+		cout << "Error: binneddiff failed due to different bin size.";
+		exit(1);
+	}
+	return diff/sum() * 100;
+}
+
 std::vector<double> Histogram::subtraction(Histogram input)
 {
 	std::vector<double> result;
